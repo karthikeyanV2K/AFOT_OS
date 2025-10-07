@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.afot.musicplayer">
+
+    <!-- Audio and Media Permissions -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    
+    <!-- Bluetooth Permissions -->
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+    
+    <!-- Audio Focus and Media Button -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    
+    <!-- Network for streaming (future feature) -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    
+    <!-- System UI and Lockscreen Integration -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
+    
+    <!-- AFOT System Permissions -->
+    <uses-permission android:name="com.afot.permission.ENHANCED_AUDIO" />
+    <uses-permission android:name="com.afot.permission.SYSTEM_INTEGRATION" />
+
+    <!-- Hardware Features -->
+    <uses-feature
+        android:name="android.hardware.bluetooth"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.audio.output"
+        android:required="true" />
+    <uses-feature
+        android:name="android.hardware.microphone"
+        android:required="false" />
+
+    <application
+        android:name=".AFOTMusicApplication"
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.AFOTMusicPlayer"
+        android:requestLegacyExternalStorage="true"
+        tools:targetApi="31">
+
+        <!-- Main Activity -->
+        <activity
+            android:name=".ui.activity.MainActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AFOTMusicPlayer.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            
+            <!-- Media Intent Filters -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="audio/*" />
+            </intent-filter>
+            
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="file" />
+                <data android:mimeType="*/*" />
+                <data android:pathPattern=".*\\.mp3" />
+                <data android:pathPattern=".*\\.flac" />
+                <data android:pathPattern=".*\\.ogg" />
+                <data android:pathPattern=".*\\.m4a" />
+                <data android:pathPattern=".*\\.aac" />
+            </intent-filter>
+        </activity>
+
+        <!-- Player Activity (Full Screen) -->
+        <activity
+            android:name=".ui.activity.PlayerActivity"
+            android:exported="false"
+            android:launchMode="singleTop"
+            android:parentActivityName=".ui.activity.MainActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AFOTMusicPlayer.NoActionBar" />
+
+        <!-- Settings Activity -->
+        <activity
+            android:name=".ui.activity.SettingsActivity"
+            android:exported="false"
+            android:label="@string/settings"
+            android:parentActivityName=".ui.activity.MainActivity"
+            android:theme="@style/Theme.AFOTMusicPlayer" />
+
+        <!-- Equalizer Activity -->
+        <activity
+            android:name=".ui.activity.EqualizerActivity"
+            android:exported="false"
+            android:label="@string/equalizer"
+            android:parentActivityName=".ui.activity.MainActivity"
+            android:theme="@style/Theme.AFOTMusicPlayer" />
+
+        <!-- Music Service -->
+        <service
+            android:name=".service.MusicService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback">
+            
+            <!-- Media Session Service -->
+            <intent-filter>
+                <action android:name="androidx.media3.session.MediaSessionService" />
+            </intent-filter>
+            
+            <!-- Media Button Receiver -->
+            <intent-filter android:priority="1000">
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </service>
+
+        <!-- Audio Focus Service -->
+        <service
+            android:name=".service.AudioFocusService"
+            android:enabled="true"
+            android:exported="false" />
+
+        <!-- Bluetooth Service -->
+        <service
+            android:name=".service.BluetoothAudioService"
+            android:enabled="true"
+            android:exported="false" />
+
+        <!-- Media Button Receiver -->
+        <receiver
+            android:name=".receiver.MediaButtonReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter android:priority="1000">
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Headset Plug Receiver -->
+        <receiver
+            android:name=".receiver.HeadsetPlugReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.HEADSET_PLUG" />
+                <action android:name="android.media.AUDIO_BECOMING_NOISY" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Bluetooth Receiver -->
+        <receiver
+            android:name=".receiver.BluetoothReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.bluetooth.adapter.action.STATE_CHANGED" />
+                <action android:name="android.bluetooth.adapter.action.CONNECTION_STATE_CHANGED" />
+                <action android:name="android.bluetooth.a2dp.profile.action.CONNECTION_STATE_CHANGED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Boot Receiver (for auto-start) -->
+        <receiver
+            android:name=".receiver.BootReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter android:priority="1000">
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.PACKAGE_REPLACED" />
+                <data android:scheme="package" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Widget Provider -->
+        <receiver
+            android:name=".widget.MusicWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/music_widget_info" />
+        </receiver>
+
+        <!-- File Provider for sharing -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+        <!-- Content Provider for media database -->
+        <provider
+            android:name=".data.provider.MusicContentProvider"
+            android:authorities="${applicationId}.musicprovider"
+            android:enabled="true"
+            android:exported="false" />
+
+        <!-- Work Manager Initialize -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.startup"
+                tools:node="remove" />
+        </provider>
+
+    </application>
+
+</manifest>

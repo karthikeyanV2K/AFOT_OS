@@ -1,0 +1,292 @@
+{
+  "devices": {
+    "j5xnlte": {
+      "codename": "j5xnlte",
+      "manufacturer": "samsung",
+      "model": "Galaxy J5 Prime",
+      "arch": "arm",
+      "android_version": "13",
+      "soc": "exynos7570",
+      "flash_method": "heimdall",
+      "bootloader_mode": "download",
+      "key_combination": "Power + Home + Volume Down",
+      "supports_ab": false,
+      "treble_support": false,
+      "kernel_source": "https://github.com/LineageOS/android_kernel_samsung_exynos7570",
+      "device_tree": "https://github.com/LineageOS/android_device_samsung_j5xnlte",
+      "vendor_blobs": "https://github.com/TheMuppets/proprietary_vendor_samsung",
+      "partitions": {
+        "BOOT": "boot.img",
+        "RECOVERY": "recovery.img", 
+        "SYSTEM": "system.img",
+        "USERDATA": "userdata.img",
+        "CACHE": "cache.img",
+        "MODEM": "modem.bin",
+        "BOOTLOADER": "sboot.bin"
+      },
+      "special_instructions": [
+        "Enable OEM unlocking in Developer Options",
+        "Enable USB debugging",
+        "Install Samsung USB drivers",
+        "Backup EFS partition before flashing"
+      ],
+      "build_flags": {
+        "TARGET_KERNEL_CONFIG": "j5xnlte_defconfig",
+        "TARGET_RECOVERY_FSTAB": "device/samsung/j5xnlte/recovery.fstab",
+        "BOARD_KERNEL_CMDLINE": "console=null androidboot.hardware=samsungexynos7570 androidboot.selinux=enforcing",
+        "TARGET_BOOTLOADER_BOARD_NAME": "universal7570"
+      }
+    },
+    "j5nlte": {
+      "codename": "j5nlte", 
+      "manufacturer": "samsung",
+      "model": "Galaxy J5 2015",
+      "arch": "arm",
+      "android_version": "13",
+      "soc": "msm8916",
+      "flash_method": "heimdall",
+      "bootloader_mode": "download",
+      "key_combination": "Power + Home + Volume Down",
+      "supports_ab": false,
+      "treble_support": false,
+      "kernel_source": "https://github.com/LineageOS/android_kernel_samsung_msm8916",
+      "device_tree": "https://github.com/LineageOS/android_device_samsung_j5nlte",
+      "vendor_blobs": "https://github.com/TheMuppets/proprietary_vendor_samsung",
+      "partitions": {
+        "BOOT": "boot.img",
+        "RECOVERY": "recovery.img",
+        "SYSTEM": "system.img", 
+        "USERDATA": "userdata.img",
+        "CACHE": "cache.img",
+        "MODEM": "NON-HLOS.bin",
+        "BOOTLOADER": "sbl1.mbn"
+      },
+      "special_instructions": [
+        "Enable OEM unlocking in Developer Options",
+        "Enable USB debugging",
+        "Install Samsung USB drivers",
+        "Backup EFS partition before flashing"
+      ],
+      "build_flags": {
+        "TARGET_KERNEL_CONFIG": "msm8916_sec_defconfig",
+        "TARGET_RECOVERY_FSTAB": "device/samsung/j5nlte/recovery.fstab",
+        "BOARD_KERNEL_CMDLINE": "console=null androidboot.hardware=qcom user_debug=23 msm_rtb.filter=0x3F ehci-hcd.park=3 androidboot.bootdevice=7824900.sdhci",
+        "TARGET_BOOTLOADER_BOARD_NAME": "MSM8916"
+      }
+    },
+    "sailfish": {
+      "codename": "sailfish",
+      "manufacturer": "google", 
+      "model": "Pixel",
+      "arch": "arm64",
+      "android_version": "13",
+      "soc": "msm8996",
+      "flash_method": "fastboot",
+      "bootloader_mode": "fastboot",
+      "key_combination": "Power + Volume Down",
+      "supports_ab": true,
+      "treble_support": true,
+      "kernel_source": "https://android.googlesource.com/kernel/msm",
+      "device_tree": "https://github.com/LineageOS/android_device_google_sailfish",
+      "vendor_blobs": "https://github.com/TheMuppets/proprietary_vendor_google",
+      "partitions": {
+        "boot_a": "boot.img",
+        "boot_b": "boot.img",
+        "system_a": "system.img",
+        "system_b": "system.img", 
+        "vendor_a": "vendor.img",
+        "vendor_b": "vendor.img",
+        "userdata": "userdata.img"
+      },
+      "special_instructions": [
+        "Enable OEM unlocking in Developer Options",
+        "Enable USB debugging",
+        "Unlock bootloader with 'fastboot flashing unlock'",
+        "Device will wipe data when unlocking bootloader"
+      ],
+      "build_flags": {
+        "TARGET_KERNEL_CONFIG": "sailfish_defconfig",
+        "TARGET_RECOVERY_FSTAB": "device/google/sailfish/fstab.sailfish",
+        "BOARD_KERNEL_CMDLINE": "console=ttyHSL0,115200,n8 androidboot.console=ttyHSL0 androidboot.hardware=sailfish user_debug=31 ehci-hcd.park=3 lpm_levels.sleep_disabled=1 cma=32M@0-0xffffffff loop.max_part=7 buildvariant=userdebug",
+        "TARGET_BOOTLOADER_BOARD_NAME": "sailfish"
+      }
+    },
+    "marlin": {
+      "codename": "marlin",
+      "manufacturer": "google",
+      "model": "Pixel XL", 
+      "arch": "arm64",
+      "android_version": "13",
+      "soc": "msm8996",
+      "flash_method": "fastboot",
+      "bootloader_mode": "fastboot",
+      "key_combination": "Power + Volume Down",
+      "supports_ab": true,
+      "treble_support": true,
+      "kernel_source": "https://android.googlesource.com/kernel/msm",
+      "device_tree": "https://github.com/LineageOS/android_device_google_marlin",
+      "vendor_blobs": "https://github.com/TheMuppets/proprietary_vendor_google",
+      "partitions": {
+        "boot_a": "boot.img",
+        "boot_b": "boot.img",
+        "system_a": "system.img",
+        "system_b": "system.img",
+        "vendor_a": "vendor.img", 
+        "vendor_b": "vendor.img",
+        "userdata": "userdata.img"
+      },
+      "special_instructions": [
+        "Enable OEM unlocking in Developer Options",
+        "Enable USB debugging", 
+        "Unlock bootloader with 'fastboot flashing unlock'",
+        "Device will wipe data when unlocking bootloader"
+      ],
+      "build_flags": {
+        "TARGET_KERNEL_CONFIG": "marlin_defconfig",
+        "TARGET_RECOVERY_FSTAB": "device/google/marlin/fstab.marlin",
+        "BOARD_KERNEL_CMDLINE": "console=ttyHSL0,115200,n8 androidboot.console=ttyHSL0 androidboot.hardware=marlin user_debug=31 ehci-hcd.park=3 lpm_levels.sleep_disabled=1 cma=32M@0-0xffffffff loop.max_part=7 buildvariant=userdebug",
+        "TARGET_BOOTLOADER_BOARD_NAME": "marlin"
+      }
+    },
+    "gsi": {
+      "codename": "gsi",
+      "manufacturer": "generic",
+      "model": "Generic System Image",
+      "arch": "arm64",
+      "android_version": "13", 
+      "soc": "generic",
+      "flash_method": "fastboot",
+      "bootloader_mode": "fastboot",
+      "key_combination": "Varies by device",
+      "supports_ab": false,
+      "treble_support": true,
+      "kernel_source": null,
+      "device_tree": null,
+      "vendor_blobs": null,
+      "partitions": {
+        "system": "system.img"
+      },
+      "special_instructions": [
+        "Device must support Project Treble (Android 8.1+)",
+        "Bootloader must be unlocked",
+        "Backup existing system partition",
+        "Check device compatibility before flashing"
+      ],
+      "build_flags": {
+        "TARGET_KERNEL_CONFIG": null,
+        "TARGET_RECOVERY_FSTAB": null,
+        "BOARD_KERNEL_CMDLINE": null,
+        "TARGET_BOOTLOADER_BOARD_NAME": "generic"
+      }
+    }
+  },
+  "build_variants": {
+    "gsi_arm64": {
+      "description": "Generic System Image for ARM64 devices",
+      "lunch_target": "aosp_arm64_ab-userdebug",
+      "compatible_devices": ["All Treble-compatible ARM64 devices"],
+      "build_time_estimate": "2-4 hours"
+    },
+    "gsi_arm": {
+      "description": "Generic System Image for ARM32 devices", 
+      "lunch_target": "aosp_arm_ab-userdebug",
+      "compatible_devices": ["All Treble-compatible ARM32 devices"],
+      "build_time_estimate": "2-4 hours"
+    },
+    "device_specific": {
+      "description": "Device-specific ROM with full hardware support",
+      "lunch_target": "lineage_{codename}-userdebug",
+      "compatible_devices": ["Specific device only"],
+      "build_time_estimate": "3-6 hours"
+    }
+  },
+  "flash_methods": {
+    "fastboot": {
+      "description": "Standard Android fastboot flashing",
+      "requirements": ["Unlocked bootloader", "fastboot tool", "USB debugging"],
+      "supported_manufacturers": ["Google", "OnePlus", "Xiaomi", "Motorola"],
+      "commands": [
+        "fastboot flash boot boot.img",
+        "fastboot flash system system.img", 
+        "fastboot flash vendor vendor.img",
+        "fastboot reboot"
+      ]
+    },
+    "heimdall": {
+      "description": "Samsung device flashing (Linux)",
+      "requirements": ["Download mode", "Heimdall tool", "Samsung USB drivers"],
+      "supported_manufacturers": ["Samsung"],
+      "commands": [
+        "heimdall flash --BOOT boot.img --SYSTEM system.img --RECOVERY recovery.img --reboot"
+      ]
+    },
+    "odin": {
+      "description": "Samsung device flashing (Windows)",
+      "requirements": ["Download mode", "Odin3 tool", "Samsung USB drivers"],
+      "supported_manufacturers": ["Samsung"],
+      "commands": [
+        "Use Odin3 GUI to flash TAR files"
+      ]
+    }
+  },
+  "testing_profiles": {
+    "basic": {
+      "description": "Basic functionality tests",
+      "categories": ["system", "afot"],
+      "priorities": ["high"],
+      "estimated_time": "5-10 minutes"
+    },
+    "audio": {
+      "description": "Audio system comprehensive tests",
+      "categories": ["audio", "performance"],
+      "priorities": ["high", "medium"],
+      "estimated_time": "10-15 minutes"
+    },
+    "security": {
+      "description": "Security and lock system tests",
+      "categories": ["security", "afot"],
+      "priorities": ["high", "medium"],
+      "estimated_time": "10-15 minutes"
+    },
+    "full": {
+      "description": "Complete test suite",
+      "categories": ["system", "audio", "security", "performance", "ui", "network", "storage", "sensors", "afot"],
+      "priorities": ["high", "medium", "low"],
+      "estimated_time": "30-45 minutes"
+    }
+  },
+  "afot_features": {
+    "enhanced_audio": {
+      "description": "Advanced audio processing and effects",
+      "property": "ro.afot.music.enhanced_audio",
+      "default_value": "true",
+      "dependencies": ["AFOTMusicPlayer", "libafotaudio"]
+    },
+    "biometric_lock": {
+      "description": "Advanced biometric authentication",
+      "property": "ro.afot.lock.biometric_support", 
+      "default_value": "true",
+      "dependencies": ["AFOTLockSystem", "BiometricService"]
+    },
+    "performance_mode": {
+      "description": "Optimized performance settings",
+      "property": "ro.afot.performance.mode",
+      "default_value": "balanced",
+      "options": ["battery", "balanced", "performance"]
+    },
+    "security_level": {
+      "description": "Security enforcement level",
+      "property": "ro.afot.security.level",
+      "default_value": "high",
+      "options": ["standard", "high", "maximum"]
+    }
+  },
+  "version_info": {
+    "afot_version": "1.0.0-ALPHA",
+    "android_base": "13.0",
+    "security_patch": "2024-01-01",
+    "build_date": "2024-01-01",
+    "supported_api_levels": [28, 29, 30, 31, 32, 33],
+    "minimum_api_level": 28
+  }
+}

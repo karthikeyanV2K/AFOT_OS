@@ -1,0 +1,382 @@
+# AFOT Custom Android OS - CI/CD Pipeline
+# GitLab CI configuration for automated building and testing
+
+stages:
+  - validate
+  - build-gsi
+  - build-devices
+  - test
+  - package
+  - deploy
+
+variables:
+  ANDROID_ROOT: "/builds/android"
+  AFOT_ROOT: "/builds/android/afot"
+  CCACHE_DIR: "/cache/ccache"
+  CCACHE_SIZE: "50G"
+  REPO_URL: "https://storage.googleapis.com/git-repo-downloads/repo"
+  
+# Cache configuration
+cache:
+  key: "afot-build-cache"
+  paths:
+    - .ccache/
+    - android/
+
+# Before script - common setup
+before_script:
+  - echo "Starting AFOT CI Pipeline"
+  - export USE_CCACHE=1
+  - export CCACHE_DIR=$CCACHE_DIR
+  - mkdir -p $ANDROID_ROOT $CCACHE_DIR
+  - apt-get update -qq
+  - apt-get install -y -qq git-core gnupg flex bison build-essential zip curl
+    zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 libncurses5 
+    libncurses5-dev x11proto-core-dev libx11-dev openjdk-11-jdk python3 
+    python3-pip ccache rsync unzip bc bison flex make gcc g++ libssl-dev 
+    libxml2-utils xsltproc imagemagick schedtool e2fsprogs util-linux
+  - ccache -M $CCACHE_SIZE
+  - ccache -z
+
+# Validation stage
+validate-code:
+  stage: validate
+  script:
+    - echo "Validating AFOT codebase..."
+    - python3 -m py_compile build_scripts/*.py
+    - python3 -m py_compile flash_tools/*.py
+    - python3 -m py_compile testing/*.py
+    - echo "Code validation completed"
+  only:
+    - merge_requests
+    - main
+    - develop
+
+validate-manifests:
+  stage: validate
+  script:
+    - echo "Validating Android manifests..."
+    - find apps/ -name "AndroidManifest.xml" -exec xmllint --noout {} \;
+    - echo "Manifest validation completed"
+  only:
+    - merge_requests
+    - main
+    - develop
+
+# GSI Build Jobs
+build-gsi-arm64:
+  stage: build-gsi
+  script:
+    - echo "Building AFOT GSI ARM64..."
+    - cd $ANDROID_ROOT
+    - mkdir -p aosp && cd aosp
+    - curl $REPO_URL > ~/bin/repo && chmod a+x ~/bin/repo
+    - export PATH=~/bin:$PATH
+    - repo init -u https://android.googlesource.com/platform/manifest -b android-14.0.0_r1 --git-lfs
+    - repo sync -c -j$(nproc) --force-sync --no-clone-bundle
+    - source build/envsetup.sh
+    - lunch aosp_arm64_ab-userdebug
+    - make -j$(nproc) systemimage
+    - cp out/target/product/generic_arm64_ab/system.img $CI_PROJECT_DIR/afot_gsi_arm64.img
+  artifacts:
+    name: "afot-gsi-arm64-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - afot_gsi_arm64.img
+    expire_in: 7 days
+  timeout: 4h
+  only:
+    - main
+    - develop
+    - tags
+
+build-gsi-arm32:
+  stage: build-gsi
+  script:
+    - echo "Building AFOT GSI ARM32..."
+    - cd $ANDROID_ROOT
+    - mkdir -p aosp && cd aosp
+    - curl $REPO_URL > ~/bin/repo && chmod a+x ~/bin/repo
+    - export PATH=~/bin:$PATH
+    - repo init -u https://android.googlesource.com/platform/manifest -b android-14.0.0_r1 --git-lfs
+    - repo sync -c -j$(nproc) --force-sync --no-clone-bundle
+    - source build/envsetup.sh
+    - lunch aosp_arm_ab-userdebug
+    - make -j$(nproc) systemimage
+    - cp out/target/product/generic_arm_ab/system.img $CI_PROJECT_DIR/afot_gsi_arm32.img
+  artifacts:
+    name: "afot-gsi-arm32-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - afot_gsi_arm32.img
+    expire_in: 7 days
+  timeout: 4h
+  only:
+    - main
+    - develop
+    - tags
+
+# Device-specific builds
+build-j5xnlte:
+  stage: build-devices
+  script:
+    - echo "Building AFOT ROM for Samsung J5 Prime..."
+    - cd $ANDROID_ROOT
+    - mkdir -p lineage && cd lineage
+    - curl $REPO_URL > ~/bin/repo && chmod a+x ~/bin/repo
+    - export PATH=~/bin:$PATH
+    - repo init -u https://github.com/LineageOS/android.git -b lineage-20.0 --git-lfs
+    - mkdir -p .repo/local_manifests
+    - cp $CI_PROJECT_DIR/device_trees/j5xnlte.xml .repo/local_manifests/
+    - repo sync -c -j$(nproc) --force-sync --no-clone-bundle
+    - source build/envsetup.sh
+    - lunch lineage_j5xnlte-userdebug
+    - mka bacon
+    - cp out/target/product/j5xnlte/lineage-*.zip $CI_PROJECT_DIR/afot_j5xnlte.zip
+  artifacts:
+    name: "afot-j5xnlte-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - afot_j5xnlte.zip
+    expire_in: 7 days
+  timeout: 6h
+  only:
+    - main
+    - develop
+    - tags
+
+build-sailfish:
+  stage: build-devices
+  script:
+    - echo "Building AFOT ROM for Google Pixel..."
+    - cd $ANDROID_ROOT
+    - mkdir -p lineage && cd lineage
+    - curl $REPO_URL > ~/bin/repo && chmod a+x ~/bin/repo
+    - export PATH=~/bin:$PATH
+    - repo init -u https://github.com/LineageOS/android.git -b lineage-20.0 --git-lfs
+    - mkdir -p .repo/local_manifests
+    - cp $CI_PROJECT_DIR/device_trees/sailfish.xml .repo/local_manifests/
+    - repo sync -c -j$(nproc) --force-sync --no-clone-bundle
+    - source build/envsetup.sh
+    - lunch lineage_sailfish-userdebug
+    - mka bacon
+    - cp out/target/product/sailfish/lineage-*.zip $CI_PROJECT_DIR/afot_sailfish.zip
+  artifacts:
+    name: "afot-sailfish-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - afot_sailfish.zip
+    expire_in: 7 days
+  timeout: 6h
+  only:
+    - main
+    - develop
+    - tags
+
+# Testing stage
+test-build-system:
+  stage: test
+  script:
+    - echo "Testing AFOT build system..."
+    - python3 -m pytest build_scripts/test_build_system.py -v
+    - echo "Build system tests completed"
+  dependencies: []
+  only:
+    - merge_requests
+    - main
+    - develop
+
+test-flash-tools:
+  stage: test
+  script:
+    - echo "Testing AFOT flash tools..."
+    - python3 -m pytest flash_tools/test_flash_tools.py -v
+    - echo "Flash tools tests completed"
+  dependencies: []
+  only:
+    - merge_requests
+    - main
+    - develop
+
+test-apps-unit:
+  stage: test
+  script:
+    - echo "Running unit tests for AFOT apps..."
+    - cd apps/AFOTMusicPlayer
+    - ./gradlew test --no-daemon
+    - cd ../AFOTLockSystem
+    - ./gradlew test --no-daemon
+    - echo "App unit tests completed"
+  dependencies: []
+  only:
+    - merge_requests
+    - main
+    - develop
+
+# Integration tests (requires device)
+test-integration:
+  stage: test
+  script:
+    - echo "Running integration tests..."
+    - if [ -n "$TEST_DEVICE_SERIAL" ]; then
+        python3 testing/afot_test_suite.py --device $TEST_DEVICE_SERIAL --categories system afot --priorities high;
+      else
+        echo "No test device available, skipping integration tests";
+      fi
+  dependencies:
+    - build-gsi-arm64
+  allow_failure: true
+  only:
+    - main
+    - develop
+
+# Packaging stage
+package-release:
+  stage: package
+  script:
+    - echo "Packaging AFOT release..."
+    - mkdir -p release/
+    - cp afot_gsi_*.img release/ 2>/dev/null || true
+    - cp afot_*.zip release/ 2>/dev/null || true
+    - cd release/
+    - for file in *; do
+        sha256sum "$file" > "$file.sha256";
+      done
+    - tar -czf afot-release-$CI_COMMIT_SHORT_SHA.tar.gz *
+    - mv afot-release-$CI_COMMIT_SHORT_SHA.tar.gz ../
+  artifacts:
+    name: "afot-release-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - afot-release-*.tar.gz
+      - release/
+    expire_in: 30 days
+  dependencies:
+    - build-gsi-arm64
+    - build-gsi-arm32
+    - build-j5xnlte
+    - build-sailfish
+  only:
+    - main
+    - tags
+
+# Documentation generation
+generate-docs:
+  stage: package
+  script:
+    - echo "Generating documentation..."
+    - pip3 install mkdocs mkdocs-material
+    - mkdocs build
+    - tar -czf afot-docs-$CI_COMMIT_SHORT_SHA.tar.gz site/
+  artifacts:
+    name: "afot-docs-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - afot-docs-*.tar.gz
+      - site/
+    expire_in: 30 days
+  only:
+    - main
+    - tags
+
+# Deployment stage
+deploy-staging:
+  stage: deploy
+  script:
+    - echo "Deploying to staging environment..."
+    - rsync -avz release/ $STAGING_SERVER:/var/www/afot/staging/
+    - curl -X POST "$STAGING_WEBHOOK_URL" -d "version=$CI_COMMIT_SHORT_SHA"
+  environment:
+    name: staging
+    url: https://staging.afot.dev
+  dependencies:
+    - package-release
+  only:
+    - develop
+
+deploy-production:
+  stage: deploy
+  script:
+    - echo "Deploying to production..."
+    - rsync -avz release/ $PRODUCTION_SERVER:/var/www/afot/releases/
+    - curl -X POST "$PRODUCTION_WEBHOOK_URL" -d "version=$CI_COMMIT_TAG"
+    - echo "Production deployment completed"
+  environment:
+    name: production
+    url: https://afot.dev
+  dependencies:
+    - package-release
+  when: manual
+  only:
+    - tags
+
+# Notification jobs
+notify-success:
+  stage: deploy
+  script:
+    - echo "Build completed successfully!"
+    - curl -X POST "$DISCORD_WEBHOOK" -H "Content-Type: application/json" 
+      -d "{\"content\":\"✅ AFOT Build $CI_COMMIT_SHORT_SHA completed successfully!\"}"
+  when: on_success
+  dependencies: []
+  only:
+    - main
+    - tags
+
+notify-failure:
+  stage: deploy
+  script:
+    - echo "Build failed!"
+    - curl -X POST "$DISCORD_WEBHOOK" -H "Content-Type: application/json" 
+      -d "{\"content\":\"❌ AFOT Build $CI_COMMIT_SHORT_SHA failed! Check pipeline logs.\"}"
+  when: on_failure
+  dependencies: []
+  only:
+    - main
+    - tags
+
+# Cleanup job
+cleanup:
+  stage: deploy
+  script:
+    - echo "Cleaning up build artifacts..."
+    - ccache -s
+    - ccache -c
+    - rm -rf $ANDROID_ROOT/*/out/
+    - echo "Cleanup completed"
+  when: always
+  dependencies: []
+
+# Security scanning
+security-scan:
+  stage: validate
+  script:
+    - echo "Running security scans..."
+    - pip3 install bandit safety
+    - bandit -r build_scripts/ flash_tools/ testing/ -f json -o security-report.json || true
+    - safety check --json --output security-deps.json || true
+    - echo "Security scan completed"
+  artifacts:
+    reports:
+      security: security-report.json
+    paths:
+      - security-*.json
+    expire_in: 7 days
+  allow_failure: true
+  only:
+    - merge_requests
+    - main
+
+# Performance benchmarking
+benchmark:
+  stage: test
+  script:
+    - echo "Running performance benchmarks..."
+    - if [ -n "$BENCHMARK_DEVICE_SERIAL" ]; then
+        python3 testing/afot_test_suite.py --device $BENCHMARK_DEVICE_SERIAL 
+        --categories performance --priorities high medium > benchmark-results.txt;
+      else
+        echo "No benchmark device available";
+      fi
+  artifacts:
+    paths:
+      - benchmark-results.txt
+    expire_in: 7 days
+  allow_failure: true
+  only:
+    - main
+    - develop
